@@ -26,7 +26,7 @@ import org.locationtech.jts.util.Assert;
  */
 abstract public class GraphComponent {
 
-  protected Label label;
+  public Label label;
   /**
    * isInResult indicates if this component has already been included in the result
    */
@@ -34,6 +34,13 @@ abstract public class GraphComponent {
   private boolean isCovered = false;
   private boolean isCoveredSet = false;
   private boolean isVisited = false;
+
+  public void clear(){
+    isInResult = false;
+    isCovered = false;
+    isCoveredSet = false;
+    isVisited = false;
+  }
 
   public GraphComponent() {
   }

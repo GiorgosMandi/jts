@@ -53,7 +53,7 @@ public class Label {
     return lineLabel;
   }
 
-  TopologyLocation elt[] = new TopologyLocation[2];
+  public TopologyLocation elt[] = new TopologyLocation[2];
 
   /**
    * Construct a Label with a single location for both Geometries.

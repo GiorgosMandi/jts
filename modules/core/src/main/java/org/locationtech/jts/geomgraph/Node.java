@@ -29,7 +29,7 @@ public class Node
   extends GraphComponent
 {
   protected Coordinate coord; // only non-null if this node is precise
-  protected EdgeEndStar edges;
+  public EdgeEndStar edges;
 
   public Node(Coordinate coord, EdgeEndStar edges)
   {

@@ -14,11 +14,7 @@
  */
 package org.locationtech.jts.geomgraph;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.locationtech.jts.algorithm.BoundaryNodeRule;
 import org.locationtech.jts.algorithm.LineIntersector;
@@ -43,6 +39,7 @@ import org.locationtech.jts.geom.Position;
 import org.locationtech.jts.geomgraph.index.EdgeSetIntersector;
 import org.locationtech.jts.geomgraph.index.SegmentIntersector;
 import org.locationtech.jts.geomgraph.index.SimpleMCSweepLineIntersector;
+import org.locationtech.jts.geomgraph.index.SweepLineEvent;
 import org.locationtech.jts.util.Assert;
 
 /**
@@ -106,6 +103,21 @@ public class GeometryGraph
   private PointOnGeometryLocator areaPtLocator = null;
   // for use if geometry is not Polygonal
   private final PointLocator ptLocator = new PointLocator();
+
+
+  public void clearGraph(){
+    for (Object edge : edges) {
+      Edge e = (Edge) edge;
+      e.clear();
+    }
+
+    for (Iterator it = nodes.iterator(); it.hasNext(); ) {
+      Object node = it.next();
+      Node n = (Node) node;
+      ((Node) node).edges =null;
+      n.clear();
+    }
+  }
   
   private EdgeSetIntersector createEdgeSetIntersector()
   {
@@ -385,12 +397,21 @@ public class GeometryGraph
 
     EdgeSetIntersector esi = createEdgeSetIntersector();
     esi.computeIntersections(edges, g.edges, si);
-/*
-for (Iterator i = g.edges.iterator(); i.hasNext();) {
-Edge e = (Edge) i.next();
-Debug.print(e.getEdgeIntersectionList());
-}
-*/
+    return si;
+  }
+
+
+  public SegmentIntersector computeEdgeIntersections(GeometryGraph g, List<SweepLineEvent> se, List<SweepLineEvent> te,
+                                                     LineIntersector li, boolean includeProper) {
+
+    SegmentIntersector si = new SegmentIntersector(li, includeProper, true);
+    si.setBoundaryNodes(this.getBoundaryNodes(), g.getBoundaryNodes());
+
+    SimpleMCSweepLineIntersector esi = new SimpleMCSweepLineIntersector();
+    List<SweepLineEvent> allEvents = new ArrayList<>();
+    allEvents.addAll(se);
+    allEvents.addAll(te);
+    esi.computeIntersections(allEvents, si);
     return si;
   }
 

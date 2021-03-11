@@ -155,7 +155,7 @@ public abstract class LineIntersector
    * If makePrecise is true, computed intersection coordinates will be made precise
    * using Coordinate#makePrecise
    */
-  protected PrecisionModel precisionModel = null;
+  public PrecisionModel precisionModel = null;
 //public int numIntersects = 0;
 
   public LineIntersector() {

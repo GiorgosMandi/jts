@@ -31,6 +31,12 @@ public class Edge
   extends GraphComponent
 {
 
+  @Override
+   public void clear(){
+     super.clear();
+     this.eiList = new EdgeIntersectionList(this);
+   }
+
   /**
    * Updates an IM from the label for an edge.
    * Handles edges from both L and A geometries.

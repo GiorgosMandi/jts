@@ -38,6 +38,7 @@ import org.locationtech.jts.geomgraph.Label;
 import org.locationtech.jts.geomgraph.Node;
 import org.locationtech.jts.geomgraph.NodeMap;
 import org.locationtech.jts.geomgraph.index.SegmentIntersector;
+import org.locationtech.jts.geomgraph.index.SweepLineEvent;
 import org.locationtech.jts.operation.BoundaryOp;
 import org.locationtech.jts.util.Assert;
 
@@ -90,7 +91,6 @@ public class RelateComputer
 
     // compute intersections between edges of the two input geometries
     SegmentIntersector intersector = arg[0].computeEdgeIntersections(arg[1], li, false);
-//System.out.println("computeIM: # segment intersection tests: " + intersector.numTests);
     computeIntersectionNodes(0);
     computeIntersectionNodes(1);
     /**
@@ -101,10 +101,7 @@ public class RelateComputer
     copyNodesAndLabels(1);
 
     // complete the labelling for any nodes which only have a label for a single geometry
-//Debug.addWatch(nodes.find(new Coordinate(110, 200)));
-//Debug.printWatch();
     labelIsolatedNodes();
-//Debug.printWatch();
 
     // If a proper intersection was found, we can set a lower bound on the IM.
     computeProperIntersectionIM(intersector, im);
@@ -122,9 +119,6 @@ public class RelateComputer
     List ee1 = eeBuilder.computeEdgeEnds(arg[1].getEdgeIterator());
     insertEdgeEnds(ee1);
 
-//Debug.println("==== NodeList ===");
-//Debug.print(nodes);
-
     labelNodeEdges();
 
   /**
@@ -136,9 +130,83 @@ public class RelateComputer
    * We only need to check components contained in the input graphs, since
    * isolated components will not have been replaced by new components formed by intersections.
    */
-//debugPrintln("Graph A isolated edges - ");
     labelIsolatedEdges(0, 1);
-//debugPrintln("Graph B isolated edges - ");
+    labelIsolatedEdges(1, 0);
+
+    // update the IM from all components
+    updateIM(im);
+    return im;
+  }
+
+
+
+  public IntersectionMatrix optimizedComputeIM(List<SweepLineEvent> se, List<SweepLineEvent> te,
+                                               LineIntersector lineIntersector){
+//    Geometry g0 = arg[0].getGeometry();
+//    Geometry g1 = arg[1].getGeometry();
+//    if (g0.getPrecisionModel().compareTo(g1.getPrecisionModel()) >= 0)
+//      li.setPrecisionModel(g0.getPrecisionModel());
+//    else
+//      li.setPrecisionModel(g1.getPrecisionModel());
+//    GeometryGraph[] newArg = new GeometryGraph[]{new GeometryGraph(0, g0), new GeometryGraph(1, g1)};
+//    arg = newArg;
+
+    li = lineIntersector;
+    IntersectionMatrix im = new IntersectionMatrix();
+    // since Geometries are finite and embedded in a 2-D space, the EE element must always be 2
+    im.set(Location.EXTERIOR, Location.EXTERIOR, 2);
+
+    // if the Geometries don't overlap there is nothing to do
+    if (! arg[0].getGeometry().getEnvelopeInternal().intersects(
+            arg[1].getGeometry().getEnvelopeInternal()) ) {
+      computeDisjointIM(im, arg[0].getBoundaryNodeRule());
+      return im;
+    }
+//    arg[0].computeSelfNodes(li, false);
+//    arg[1].computeSelfNodes(li, false);
+
+    // compute intersections between edges of the two input geometries
+    SegmentIntersector intersector = arg[0].computeEdgeIntersections(arg[1], se, te, li, false);
+    computeIntersectionNodes(0);
+    computeIntersectionNodes(1);
+    /*
+     * Copy the labelling for the nodes in the parent Geometries.  These override
+     * any labels determined by intersections between the geometries.
+     */
+    copyNodesAndLabels(0);
+    copyNodesAndLabels(1);
+
+    // complete the labelling for any nodes which only have a label for a single geometry
+    labelIsolatedNodes();
+
+    // If a proper intersection was found, we can set a lower bound on the IM.
+    computeProperIntersectionIM(intersector, im);
+
+    /*
+     * Now process improper intersections
+     * (eg where one or other of the geometries has a vertex at the intersection point)
+     * We need to compute the edge graph at all nodes to determine the IM.
+     */
+
+    // build EdgeEnds for all intersections
+    EdgeEndBuilder eeBuilder = new EdgeEndBuilder();
+    List ee0 = eeBuilder.computeEdgeEnds(arg[0].getEdgeIterator());
+    insertEdgeEnds(ee0);
+    List ee1 = eeBuilder.computeEdgeEnds(arg[1].getEdgeIterator());
+    insertEdgeEnds(ee1);
+
+    labelNodeEdges();
+
+    /*
+     * Compute the labeling for isolated components
+     * <br>
+     * Isolated components are components that do not touch any other components in the graph.
+     * They can be identified by the fact that they will
+     * contain labels containing ONLY a single element, the one for their parent geometry.
+     * We only need to check components contained in the input graphs, since
+     * isolated components will not have been replaced by new components formed by intersections.
+     */
+    labelIsolatedEdges(0, 1);
     labelIsolatedEdges(1, 0);
 
     // update the IM from all components

@@ -58,6 +58,13 @@ public class SimpleMCSweepLineIntersector
     computeIntersections(si);
   }
 
+
+  public void computeIntersections(List<SweepLineEvent> events, SegmentIntersector si)
+  {
+    this.events = events;
+    computeIntersections(si);
+  }
+
   public void computeIntersections(List edges0, List edges1, SegmentIntersector si)
   {
     addEdges(edges0, edges0);
