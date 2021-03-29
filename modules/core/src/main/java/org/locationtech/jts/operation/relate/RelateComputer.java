@@ -61,7 +61,7 @@ public class RelateComputer
 {
   private LineIntersector li = new RobustLineIntersector();
   private PointLocator ptLocator = new PointLocator();
-  private GeometryGraph[] arg;  // the arg(s) of the operation
+  public GeometryGraph[] arg;  // the arg(s) of the operation
   private NodeMap nodes = new NodeMap(new RelateNodeFactory());
   // this intersection matrix will hold the results compute for the relate
   private IntersectionMatrix im = null;
@@ -70,6 +70,7 @@ public class RelateComputer
   // the intersection point found (if any)
   private Coordinate invalidPoint;
 
+  public RelateComputer() {}
   public RelateComputer(GeometryGraph[] arg) {
     this.arg = arg;
   }
@@ -142,15 +143,6 @@ public class RelateComputer
 
   public IntersectionMatrix optimizedComputeIM(List<SweepLineEvent> se, List<SweepLineEvent> te,
                                                LineIntersector lineIntersector){
-//    Geometry g0 = arg[0].getGeometry();
-//    Geometry g1 = arg[1].getGeometry();
-//    if (g0.getPrecisionModel().compareTo(g1.getPrecisionModel()) >= 0)
-//      li.setPrecisionModel(g0.getPrecisionModel());
-//    else
-//      li.setPrecisionModel(g1.getPrecisionModel());
-//    GeometryGraph[] newArg = new GeometryGraph[]{new GeometryGraph(0, g0), new GeometryGraph(1, g1)};
-//    arg = newArg;
-
     li = lineIntersector;
     IntersectionMatrix im = new IntersectionMatrix();
     // since Geometries are finite and embedded in a 2-D space, the EE element must always be 2
@@ -162,8 +154,6 @@ public class RelateComputer
       computeDisjointIM(im, arg[0].getBoundaryNodeRule());
       return im;
     }
-//    arg[0].computeSelfNodes(li, false);
-//    arg[1].computeSelfNodes(li, false);
 
     // compute intersections between edges of the two input geometries
     SegmentIntersector intersector = arg[0].computeEdgeIntersections(arg[1], se, te, li, false);

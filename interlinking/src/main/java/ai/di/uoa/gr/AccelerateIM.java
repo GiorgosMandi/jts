@@ -74,15 +74,15 @@ public class AccelerateIM {
 
         List<IntersectionMatrix> matrices = new ArrayList<>();
         List<Integer[]> indices = new ArrayList<>();
+        RelateComputer rc = new RelateComputer();
+
         int i = 0;
         for (EnhancedGeometry es: enhancedSource){
             int j = 0;
             for (EnhancedGeometry et: enhancedTarget){
                 es.clearGraph();
                 et.clearGraph();
-                GeometryGraph[] args = new GeometryGraph[]{es.geometryGraph, et.geometryGraph};
-
-                RelateComputer rc = new RelateComputer(args);
+                rc.arg = new GeometryGraph[]{es.geometryGraph, et.geometryGraph};
                 IntersectionMatrix im = rc.optimizedComputeIM(es.events, et.events, li);
                 if (!im.isDisjoint()) {
                     matrices.add(im);
